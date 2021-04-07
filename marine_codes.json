@@ -1,0 +1,23 @@
+{
+    "Malin-Fair": "EI805",
+    "Fair-Belfast": "EI806",
+    "Belfast-Strang": "EI807",
+    "Strang-Carl": "EI808",
+    "Carling-Howth": "EI809",
+    "Howth-Wicklow": "EI810",
+    "Wicklow-Carns": "EI811",
+    "Carns-Hook": "EI812",
+    "Hook-Dungarvan": "EI813",
+    "Dungarvan-Roches": "EI814",
+    "Roches-Mizen ": "EI815",
+    "Mizen-Valentia": "EI816",
+    "Valentia-Loop": "EI817",
+    "Loop-Slyne": "EI818",
+    "Slyne-Erris ": "EI819",
+    "Erris-Rossan": "EI820",
+    "Rossan-BloodyF": "EI821",
+    "BloodF-Malin": "EI822",
+    "IrishSea-IOM-N": "EI825",
+    "IrishSea-South": "EI823",
+    "IrishSea-IOM-S": "EI824"
+}
