@@ -1,7 +1,7 @@
 import requests
 import json
 import tkinter
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from datetime import datetime
 import textwrap
 from os import getcwd
@@ -167,6 +167,7 @@ class Warnings:
                                             text=message)
         self.headline_label.pack(fill='both', expand=True)
 
+
 def download_json(selected_region):
     if selected_region == "Demo":
         with open(getcwd() + '\\' + "demo_weather_warning.json", "r") as file:
@@ -246,10 +247,6 @@ def refresh(event=None):
     else:
         create_object(response, selected_region)
 
-def error_no_internet():
-    # todo
-    pass
-
 
 def create_object(response, selected_region):
     # creates a class object for all warnings that match location
@@ -270,6 +267,23 @@ def update_combox_val():
     else:
         combox.configure(values=[i for i in REGION_CODES.keys()])
         location_label.configure(text="Select County: ")
+
+
+def info_action():
+    info_window = tkinter.Toplevel()
+    info_window.title('Information')
+    info_window.iconbitmap("Assets/MetEireann logo-02.ico")
+    info_text = tkinter.Label(info_window, justify='left', wraplength=666)
+    with open(getcwd() + '\\' + "info.txt", "r") as text:
+        info_text['text'] = text.read()
+    info_text.pack()
+    info_btn['state'] = 'disabled'
+
+    def info_close():
+        info_btn['state'] = 'normal'
+        info_window.destroy()
+
+    info_window.protocol("WM_DELETE_WINDOW", info_close)
 
 
 # GUI
@@ -298,6 +312,9 @@ sea_check_box = tkinter.Checkbutton(options_frame, variable=sea_box_val, text="S
                                     command=update_combox_val)
 sea_check_box.grid(column=4, row=0)
 
+info_btn = tkinter.Button(options_frame, bitmap="info", width=25, command=info_action)
+info_btn.grid(column=6, row=0, padx=4)
+
 
 def tick():
     root.after(1000, tick)
@@ -316,6 +333,4 @@ root.mainloop()
 # todo place icons for warning type
 # todo create a new tab showing a map
 # todo make background light gray
-# todo "warning: cannot connect to internet"
-# todo give credit to met eireann
 # todo give region by province instead of county
