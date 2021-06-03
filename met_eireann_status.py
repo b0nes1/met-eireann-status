@@ -6,7 +6,7 @@ from datetime import datetime
 import textwrap
 from os import getcwd
 
-# read json files with
+# read json files with weather information
 with open(getcwd() + '\\' + "region_codes.json", "r") as file:
     REGION_CODES = json.loads(file.read())
 
@@ -31,7 +31,7 @@ warnings_objects = []  # Warnings class objects
 class Warnings:
     def __init__(self, json_data=None):
         warnings_objects.append(self)
-        self.frame = tkinter.Frame(root, **dimensions)
+        self.frame = tkinter.Frame(root, **dimensions, bg="#CDCDCD")
         self.frame.pack(fill='both', expand=True)
 
         if json_data:
@@ -66,7 +66,7 @@ class Warnings:
         self.primary.bind('<Button-1>', self.display_extra)
 
         self.headline_label = tkinter.Label(self.primary, self.style, text=self.headline, justify='center',
-                                            wraplength=500, font=('Helvetica', 11, 'bold'), width=55)
+                                            wraplength=500, font=('Helvetica', 11, 'bold'), width=59)
         self.headline_label.pack(side='top')
 
         self.primary_info_frame = tkinter.Frame(self.primary, background=self.level)
@@ -100,10 +100,10 @@ class Warnings:
 
         self.dates_frame = tkinter.Frame(self.secondary)
         self.issued_text = tkinter.Label(self.dates_frame, text='Issued: ')
-        self.issued_time = tkinter.Label(self.dates_frame, text=format_time(self.issued),
+        self.issued_time = tkinter.Label(self.dates_frame, text=friendly_time(self.issued),
                                          font=('Helvetica', 9, 'bold'))
         self.expiry_text = tkinter.Label(self.dates_frame, text='Expiry: ')
-        self.expiry_time = tkinter.Label(self.dates_frame, text=format_time(self.expiry),
+        self.expiry_time = tkinter.Label(self.dates_frame, text=friendly_time(self.expiry),
                                          font=('Helvetica', 9, 'bold'))
 
         self.dates_frame.pack(side='top')
@@ -118,25 +118,17 @@ class Warnings:
         self.desclabel.pack(side='bottom')
         self.secondary.visible = False
 
-    def delete(self=None, del_all=False):
-        if del_all is True:
-            # delete all Warning objects
-            for obj in warnings_objects:
-                for widget in obj.frame.winfo_children():
-                    widget.destroy()
-                obj.frame.destroy()
-            warnings_objects.clear()
-        else:
-            # if warning's frame exists, delete frame and everything inside it
-            # if not, only delete the warning
-            try:
-                for widget in self.frame.winfo_children():
-                    widget.destroy()
-                    widget.frame.destroy()
-            except AttributeError:
-                warnings_objects.remove(self)
+    def delete(self=None):
+        # if warning's frame exists, delete frame and everything inside it
+        # if not, only delete the warning
+        try:
+            for widget in self.frame.winfo_children():
+                widget.destroy()
+                widget.frame.destroy()
+        except AttributeError:
+            warnings_objects.remove(self)
 
-    def display_extra(self, event=None):
+    def display_extra(self, _):
         """toggle secondary panel visibility"""
 
         def forget_old():
@@ -168,6 +160,15 @@ class Warnings:
         self.headline_label.pack(fill='both', expand=True)
 
 
+def rdel():
+    """recursively delete all Warning objects"""
+    for obj in warnings_objects:
+        for widget in obj.frame.winfo_children():
+            widget.destroy()
+        obj.frame.destroy()
+    warnings_objects.clear()
+
+
 def download_json(selected_region):
     if selected_region == "Demo":
         with open(getcwd() + '\\' + "demo_weather_warning.json", "r") as file:
@@ -177,13 +178,19 @@ def download_json(selected_region):
             areacode = REGION_CODES[selected_region]
         else:
             areacode = MARINE_CODES[selected_region]
-        met_url = "https://www.met.ie/Open_Data/json/warning_" + areacode + ".json"
-
-        response = requests.get(met_url).json()  # downloads latest json from api with given region
+            Warnings().create_non_warning(message="Feature Unsupported!")
+            return
+        met_url = f"https://www.met.ie/Open_Data/json/warning_{areacode}.json"
+        try:
+            response = requests.get(met_url).json()  # downloads latest json from api with given region
+        except requests.exceptions.ConnectionError:
+            tkinter.messagebox.showerror(title='Warning',
+                                         message='Could not reach Met Eireann API. Please try again later')
+            return
     return response
 
 
-def format_time(date_input):
+def friendly_time(date_input):
     """format time to be displayed on warning card
     Example: 2021-02-21T14:45:06-00:00 -> Feb 21 At 14:45"""
     date_object = datetime.strptime(date_input, '%Y-%m-%dT%H:%M:%S%z')
@@ -234,16 +241,17 @@ def flash_red():
             pass
 
 
-def refresh(event=None):
-    Warnings.delete(del_all=True)
+def refresh(_=None):
+    rdel()
 
     selected_region = combox.get()  # gets the selected region from combo box
     response = download_json(selected_region)
+    if response is None:
+        return None
 
     # if there are no warnings, display it as a message
     if len(response) == 0:
         Warnings().create_non_warning(message="There are no warnings for the selected region")
-    # root.geometry('350x200')
     else:
         create_object(response, selected_region)
 
@@ -278,9 +286,11 @@ def info_action():
         info_text['text'] = text.read()
     info_text.pack()
     info_btn['state'] = 'disabled'
+    info_btn['relief'] = 'sunken'
 
     def info_close():
         info_btn['state'] = 'normal'
+        info_btn['relief'] = 'raised'
         info_window.destroy()
 
     info_window.protocol("WM_DELETE_WINDOW", info_close)
@@ -291,7 +301,6 @@ root = tkinter.Tk()
 root.resizable(False, False)
 root.title("Met Eireann Status")
 root.iconbitmap("Assets/MetEireann logo-02.ico")
-root["bg"] = "gray"  # todo this doesn't work. Why?
 
 options_frame = tkinter.LabelFrame(root, relief=tkinter.RAISED, borderwidth=5, bg='white')
 options_frame.pack(fill='x')
@@ -329,8 +338,9 @@ root.mainloop()
 # todo auto launch at startup and check for warnings in background process
 # todo implement timer to prevent spamming requests
 # todo display time and date on options bar
-# todo create a new tab showing what warning information means
+# todo edit info.txt to explain warning types
 # todo place icons for warning type
 # todo create a new tab showing a map
-# todo make background light gray
 # todo give region by province instead of county
+# todo daily report
+# todo fix blank card showing when warning is expired
