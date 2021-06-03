@@ -26,50 +26,81 @@ level_to_style = {
 }
 
 warnings_objects = []  # Warnings class objects
+card_objects = []
 
 
-class Warnings:
-    def __init__(self, json_data=None):
+class WarningInfo:
+    """Stores necessary weather warning information"""
+
+    def __init__(self, json_data):
         warnings_objects.append(self)
+
+        print(json_data)
+        self.cap_id = json_data['capId']
+        self.id = json_data['id']
+        self.type = json_data['type']
+        self.severity = json_data['severity']
+        self.certainty = json_data['certainty']
+        self.level = json_data['level']
+        self.issued = json_data['issued']
+        self.updated = json_data['updated']
+        self.onset = json_data['onset']
+        self.expiry = json_data['expiry']
+        self.headline = json_data['headline']
+        self.description = json_data['description']
+        self.regions = json_data['regions']
+        self.status = json_data['status']
+
+        self.delta = None
+        self.delta_msg = None
+        self.style = level_to_style[self.level]
+
+        if update_time(self) == 'expired':
+            print("warning is expired")
+            warnings_objects.remove(self)
+        else:
+            Card().make(self)
+
+
+class Card:
+    def __init__(self):
+        card_objects.append(self)
         self.frame = tkinter.Frame(root, **dimensions, bg="#CDCDCD")
         self.frame.pack(fill='both', expand=True)
 
-        if json_data:
-            print(json_data)
-            self.cap_id = json_data['capId']
-            self.id = json_data['id']
-            self.type = json_data['type']
-            self.severity = json_data['severity']
-            self.certainty = json_data['certainty']
-            self.level = json_data['level']
-            self.issued = json_data['issued']
-            self.updated = json_data['updated']
-            self.onset = json_data['onset']
-            self.expiry = json_data['expiry']
-            self.headline = json_data['headline']
-            self.description = json_data['description']
-            self.regions = json_data['regions']
-            self.status = json_data['status']
+        self.primary = None
+        self.headline_label = None
+        self.primary_info_frame = None
+        self.certainty_frame = None
+        self.delta_frame = None
+        self.severity_frame = None
+        self.certainty_label = None
+        self.certainty_text = None
+        self.delta_label = None
+        self.delta_text = None
+        self.severity_label = None
+        self.severity_text = None
+        self.secondary = None
+        self.dates_frame = None
+        self.issued_text = None
+        self.issued_time = None
+        self.expiry_text = None
+        self.expiry_time = None
+        self.desclabel = None
 
-            self.delta = None
-            self.delta_msg = None
-            self.style = level_to_style[self.level]
 
-            if update_time() != 'expired':
-                self.make()
 
-    def make(self):
+    def make(self, warn: WarningInfo):
 
-        # primary
-        self.primary = tkinter.Frame(self.frame, background=self.level, **dimensions)
+        self.primary = tkinter.Frame(self.frame, background=warn.level, **dimensions)
         self.primary.pack(fill='both', side='left')
         self.primary.bind('<Button-1>', self.display_extra)
 
-        self.headline_label = tkinter.Label(self.primary, self.style, text=self.headline, justify='center',
+        self.headline_label = tkinter.Label(self.primary, warn.style, text=warn.headline, justify='center',
                                             wraplength=500, font=('Helvetica', 11, 'bold'), width=59)
         self.headline_label.pack(side='top')
 
-        self.primary_info_frame = tkinter.Frame(self.primary, background=self.level)
+        self.primary_info_frame = tkinter.Frame(self.primary, background=warn.level)
         self.certainty_frame = tkinter.Frame(self.primary_info_frame)
         self.delta_frame = tkinter.Frame(self.primary_info_frame)
         self.severity_frame = tkinter.Frame(self.primary_info_frame)
@@ -78,20 +109,20 @@ class Warnings:
         self.delta_frame.pack(side='left')
         self.severity_frame.pack(side='left')
 
-        self.certainty_label = tkinter.Label(self.certainty_frame, self.style, text="Certainty: ")
-        self.certainty_text = tkinter.Label(self.certainty_frame, self.style, font=('Helvetica', 9, 'bold'),
-                                            text=self.certainty)
+        self.certainty_label = tkinter.Label(self.certainty_frame, warn.style, text="Certainty: ")
+        self.certainty_text = tkinter.Label(self.certainty_frame, warn.style, font=('Helvetica', 9, 'bold'),
+                                            text=warn.certainty)
         self.certainty_label.pack(side='left')
         self.certainty_text.pack(side='left')
 
-        self.delta_label = tkinter.Label(self.delta_frame, self.style, text=self.delta_msg)
-        self.delta_text = tkinter.Label(self.delta_frame, self.style, text=self.delta,
+        self.delta_label = tkinter.Label(self.delta_frame, warn.style, text=warn.delta_msg)
+        self.delta_text = tkinter.Label(self.delta_frame, warn.style, text=warn.delta,
                                         font=('Helvetica', 9, 'bold'))
         self.delta_label.pack(side='left')
         self.delta_text.pack(side='left')
         self.severity_label = tkinter.Label(self.severity_frame, text="Severity: ")
-        self.severity_text = tkinter.Label(self.severity_frame, self.style, font=('Helvetica', 9, 'bold'),
-                                           text=self.severity)
+        self.severity_text = tkinter.Label(self.severity_frame, warn.style, font=('Helvetica', 9, 'bold'),
+                                           text=warn.severity)
 
         self.headline_label.bind('<Button-1>', self.display_extra)
 
@@ -100,10 +131,10 @@ class Warnings:
 
         self.dates_frame = tkinter.Frame(self.secondary)
         self.issued_text = tkinter.Label(self.dates_frame, text='Issued: ')
-        self.issued_time = tkinter.Label(self.dates_frame, text=friendly_time(self.issued),
+        self.issued_time = tkinter.Label(self.dates_frame, text=friendly_time(warn.issued),
                                          font=('Helvetica', 9, 'bold'))
         self.expiry_text = tkinter.Label(self.dates_frame, text='Expiry: ')
-        self.expiry_time = tkinter.Label(self.dates_frame, text=friendly_time(self.expiry),
+        self.expiry_time = tkinter.Label(self.dates_frame, text=friendly_time(warn.expiry),
                                          font=('Helvetica', 9, 'bold'))
 
         self.dates_frame.pack(side='top')
@@ -112,7 +143,7 @@ class Warnings:
         self.expiry_text.pack(side='left')
         self.expiry_time.pack(side='left')
 
-        self.desclabel = tkinter.Label(self.secondary, text=self.format_description(),
+        self.desclabel = tkinter.Label(self.secondary, text=self.format_description(warn),
 
                                        height=4)
         self.desclabel.pack(side='bottom')
@@ -150,41 +181,38 @@ class Warnings:
 
         self.secondary.visible = not self.secondary.visible
 
-    def format_description(self):
-        return textwrap.TextWrapper(max_lines=3).fill(text=self.description)
+    def format_description(self, warn: WarningInfo):
+        return textwrap.TextWrapper(max_lines=3).fill(text=warn.description)
 
     def create_non_warning(self, message):
         self.frame.configure(height=10, width=60)
-        self.headline_label = tkinter.Label(self.frame, style_no_warning,
-                                            text=message)
+        self.headline_label = tkinter.Label(self.frame, style_no_warning, text=message)
         self.headline_label.pack(fill='both', expand=True)
 
 
 def rdel():
-    """recursively delete all Warning objects"""
-    for obj in warnings_objects:
-        for widget in obj.frame.winfo_children():
-            widget.destroy()
+    """recursively delete all Warning_info objects"""
+    for obj in card_objects:
         obj.frame.destroy()
-    warnings_objects.clear()
+    card_objects.clear()
 
 
 def download_json(selected_region):
     if selected_region == "Demo":
-        with open(getcwd() + '\\' + "demo_weather_warning.json", "r") as file:
-            response = json.loads(file.read())
+        with open(getcwd() + '\\' + "demo_weather_warning.json", "r") as f:
+            response = json.loads(f.read())
     else:
         if selected_region in REGION_CODES:
             areacode = REGION_CODES[selected_region]
         else:
             areacode = MARINE_CODES[selected_region]
-            Warnings().create_non_warning(message="Feature Unsupported!")
+            Card().create_non_warning(message="Feature Unsupported!")
             return
         met_url = f"https://www.met.ie/Open_Data/json/warning_{areacode}.json"
         try:
             response = requests.get(met_url).json()  # downloads latest json from api with given region
         except requests.exceptions.ConnectionError:
-            tkinter.messagebox.showerror(title='Warning',
+            tkinter.messagebox.showerror(title='Warning_info',
                                          message='Could not reach Met Eireann API. Please try again later')
             return
     return response
@@ -197,35 +225,34 @@ def friendly_time(date_input):
     return date_object.strftime('%b %d At %H:%M')
 
 
-def update_time():
+def update_time(obj):
     """For every warning object, compare current time to expiration time to check if warning is expired.
     If expired, return 'expired' and delete the warning card. Otherwise check if warning is in place or not in place yet
     and assign time delta and correct label to the object attribute"""
     t_format = '%Y-%m-%dT%H:%M:%S'
     current_time = datetime.now()
 
-    for obj in warnings_objects:
-        onset_time = datetime.strptime(obj.onset[:-6], t_format)
-        expiry_time = datetime.strptime(obj.expiry[:-6], t_format)
+    onset_time = datetime.strptime(obj.onset[:-6], t_format)
+    expiry_time = datetime.strptime(obj.expiry[:-6], t_format)
 
-        if current_time > onset_time and current_time > expiry_time:
-            # we are past both the onset and the expiration
-            # destroy tkinter warning widgets and remove Warnings object.
+    if current_time > onset_time and current_time > expiry_time:
+        # we are past both the onset and the expiration
+        # destroy tkinter warning widgets and remove Warnings object.
 
-            obj.delete()
-            return "expired"
+        obj.delete()
+        return "expired"
 
-        elif current_time > onset_time:
-            # warning is in place but not expired
-            # display time until expiration
-            obj.delta = ':'.join(str(expiry_time - current_time).split(':')[:2])
-            obj.delta_msg = 'Time until expiration: '
+    elif current_time > onset_time:
+        # warning is in place but not expired
+        # display time until expiration
+        obj.delta = ':'.join(str(expiry_time - current_time).split(':')[:2])
+        obj.delta_msg = 'Time until expiration: '
 
-        else:
-            # warning is not in place yet
-            # display time until warning onset
-            obj.delta = ':'.join(str(onset_time - current_time).split(':')[:2])
-            obj.delta_msg = 'Time until onset: '
+    else:
+        # warning is not in place yet
+        # display time until warning onset
+        obj.delta = ':'.join(str(onset_time - current_time).split(':')[:2])
+        obj.delta_msg = 'Time until onset: '
 
 
 def flash_red():
@@ -251,7 +278,7 @@ def refresh(_=None):
 
     # if there are no warnings, display it as a message
     if len(response) == 0:
-        Warnings().create_non_warning(message="There are no warnings for the selected region")
+        Card().create_non_warning(message="There are no warnings for the selected region")
     else:
         create_object(response, selected_region)
 
@@ -261,10 +288,10 @@ def create_object(response, selected_region):
     # todo is this needed?
     for dict_entry in response:
         if selected_region == 'Demo' or selected_region == "All counties":
-            Warnings(dict_entry)
+            WarningInfo(dict_entry)
         elif REGION_CODES[selected_region] in dict_entry['regions']:
             print(REGION_CODES[selected_region])
-            Warnings(dict_entry)
+            WarningInfo(dict_entry)
 
 
 def update_combox_val():
