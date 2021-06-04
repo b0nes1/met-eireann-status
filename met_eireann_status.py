@@ -15,14 +15,11 @@ with open(getcwd() + '\\' + "marine_codes.json", "r") as file:
 
 dimensions = {"width": "60", "height": "10", }
 style_no_warning = {"foreground": "black", "background": "green", "font": "Helvetica 11 bold"}
-style_yellow = {"foreground": "Black", "background": "yellow"}
-style_orange = {"foreground": "Black", "background": "orange"}
-style_red = {"foreground": "Black", "background": "red"}
 style_bold = {"font": "Helvetica 9 bold"}
 level_to_style = {
-    "Yellow": style_yellow,
-    "Orange": style_orange,
-    "Red": style_red,
+    "Yellow": {"foreground": "Black", "background": "yellow"},
+    "Orange": {"foreground": "Black", "background": "orange"},
+    "Red": {"foreground": "Black", "background": "red"},
 }
 
 warnings_objects = []  # Warnings class objects
@@ -88,19 +85,17 @@ class Card:
         self.expiry_time = None
         self.desclabel = None
 
+    def make(self, data: WarningInfo):
 
-
-    def make(self, warn: WarningInfo):
-
-        self.primary = tkinter.Frame(self.frame, background=warn.level, **dimensions)
+        self.primary = tkinter.Frame(self.frame, background=data.level, **dimensions)
         self.primary.pack(fill='both', side='left')
         self.primary.bind('<Button-1>', self.display_extra)
 
-        self.headline_label = tkinter.Label(self.primary, warn.style, text=warn.headline, justify='center',
+        self.headline_label = tkinter.Label(self.primary, data.style, text=data.headline, justify='center',
                                             wraplength=500, font=('Helvetica', 11, 'bold'), width=59)
         self.headline_label.pack(side='top')
 
-        self.primary_info_frame = tkinter.Frame(self.primary, background=warn.level)
+        self.primary_info_frame = tkinter.Frame(self.primary, background=data.level)
         self.certainty_frame = tkinter.Frame(self.primary_info_frame)
         self.delta_frame = tkinter.Frame(self.primary_info_frame)
         self.severity_frame = tkinter.Frame(self.primary_info_frame)
@@ -109,20 +104,20 @@ class Card:
         self.delta_frame.pack(side='left')
         self.severity_frame.pack(side='left')
 
-        self.certainty_label = tkinter.Label(self.certainty_frame, warn.style, text="Certainty: ")
-        self.certainty_text = tkinter.Label(self.certainty_frame, warn.style, font=('Helvetica', 9, 'bold'),
-                                            text=warn.certainty)
+        self.certainty_label = tkinter.Label(self.certainty_frame, data.style, text="Certainty: ")
+        self.certainty_text = tkinter.Label(self.certainty_frame, data.style, font=('Helvetica', 9, 'bold'),
+                                            text=data.certainty)
         self.certainty_label.pack(side='left')
         self.certainty_text.pack(side='left')
 
-        self.delta_label = tkinter.Label(self.delta_frame, warn.style, text=warn.delta_msg)
-        self.delta_text = tkinter.Label(self.delta_frame, warn.style, text=warn.delta,
+        self.delta_label = tkinter.Label(self.delta_frame, data.style, text=data.delta_msg)
+        self.delta_text = tkinter.Label(self.delta_frame, data.style, text=data.delta,
                                         font=('Helvetica', 9, 'bold'))
         self.delta_label.pack(side='left')
         self.delta_text.pack(side='left')
         self.severity_label = tkinter.Label(self.severity_frame, text="Severity: ")
-        self.severity_text = tkinter.Label(self.severity_frame, warn.style, font=('Helvetica', 9, 'bold'),
-                                           text=warn.severity)
+        self.severity_text = tkinter.Label(self.severity_frame, data.style, font=('Helvetica', 9, 'bold'),
+                                           text=data.severity)
 
         self.headline_label.bind('<Button-1>', self.display_extra)
 
@@ -131,10 +126,10 @@ class Card:
 
         self.dates_frame = tkinter.Frame(self.secondary)
         self.issued_text = tkinter.Label(self.dates_frame, text='Issued: ')
-        self.issued_time = tkinter.Label(self.dates_frame, text=friendly_time(warn.issued),
+        self.issued_time = tkinter.Label(self.dates_frame, text=friendly_time(data.issued),
                                          font=('Helvetica', 9, 'bold'))
         self.expiry_text = tkinter.Label(self.dates_frame, text='Expiry: ')
-        self.expiry_time = tkinter.Label(self.dates_frame, text=friendly_time(warn.expiry),
+        self.expiry_time = tkinter.Label(self.dates_frame, text=friendly_time(data.expiry),
                                          font=('Helvetica', 9, 'bold'))
 
         self.dates_frame.pack(side='top')
@@ -143,21 +138,16 @@ class Card:
         self.expiry_text.pack(side='left')
         self.expiry_time.pack(side='left')
 
-        self.desclabel = tkinter.Label(self.secondary, text=self.format_description(warn),
+        self.desclabel = tkinter.Label(self.secondary, text=self.format_description(data),
 
                                        height=4)
         self.desclabel.pack(side='bottom')
         self.secondary.visible = False
 
-    def delete(self=None):
-        # if warning's frame exists, delete frame and everything inside it
-        # if not, only delete the warning
-        try:
-            for widget in self.frame.winfo_children():
-                widget.destroy()
-                widget.frame.destroy()
-        except AttributeError:
-            warnings_objects.remove(self)
+    def delete(self):
+        self.frame.destroy()
+        card_objects.remove(self)
+        # TODO remove object from warnings_objects list
 
     def display_extra(self, _):
         """toggle secondary panel visibility"""
@@ -184,9 +174,11 @@ class Card:
     def format_description(self, warn: WarningInfo):
         return textwrap.TextWrapper(max_lines=3).fill(text=warn.description)
 
-    def create_non_warning(self, message):
+    def create_non_warning(self, message, style=None):
+        if style is None:
+            style = style_no_warning
         self.frame.configure(height=10, width=60)
-        self.headline_label = tkinter.Label(self.frame, style_no_warning, text=message)
+        self.headline_label = tkinter.Label(self.frame, style, text=message)
         self.headline_label.pack(fill='both', expand=True)
 
 
@@ -257,7 +249,7 @@ def update_time(obj):
 
 def flash_red():
     """Make the headline of warning card flash red and white"""
-    for obj in warnings_objects:
+    for obj in card_objects:
         try:
             if obj.level == "Red":
                 if obj.headline_label["background"] != 'white':
@@ -269,6 +261,7 @@ def flash_red():
 
 
 def refresh(_=None):
+    """Called when refresh button is pressed. Deletes all card objects and displays new ones"""
     rdel()
 
     selected_region = combox.get()  # gets the selected region from combo box
@@ -284,8 +277,8 @@ def refresh(_=None):
 
 
 def create_object(response, selected_region):
-    # creates a class object for all warnings that match location
-    # todo is this needed?
+    """creates a WarningInfo class object for all warnings that match chosen location"""
+
     for dict_entry in response:
         if selected_region == 'Demo' or selected_region == "All counties":
             WarningInfo(dict_entry)
@@ -295,6 +288,7 @@ def create_object(response, selected_region):
 
 
 def update_combox_val():
+    """Changes between marine zones and counties to be displayed on the combo box widget"""
     sea_val = sea_box_val.get()
     if sea_val == 1:
         combox.configure(values=[i for i in MARINE_CODES.keys()])
