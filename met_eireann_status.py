@@ -23,15 +23,13 @@ level_to_style = {
     "Red": {"foreground": "Black", "background": "red"},
 }
 
-warnings_objects = []  # Warnings class objects
-card_objects = []
+obj_dict = {}  # Card:WarningInfo
 
 
 class WarningInfo:
     """Stores necessary weather warning information"""
 
     def __init__(self, json_data):
-        warnings_objects.append(self)
 
         print(json_data)
         self.cap_id = json_data['capId']
@@ -55,14 +53,12 @@ class WarningInfo:
 
         if update_time(self) == 'expired':
             print("warning is expired")
-            warnings_objects.remove(self)
         else:
             Card().make(self)
 
 
 class Card:
     def __init__(self):
-        card_objects.append(self)
         self.frame = tkinter.Frame(root, **dimensions, bg="#CDCDCD")
         self.frame.pack(fill='both', expand=True)
 
@@ -87,6 +83,7 @@ class Card:
         self.desclabel = None
 
     def make(self, data: WarningInfo):
+        obj_dict[self] = data
 
         self.primary = tkinter.Frame(self.frame, background=data.level, **dimensions)
         self.primary.pack(fill='both', side='left')
@@ -147,8 +144,6 @@ class Card:
 
     def delete(self):
         self.frame.destroy()
-        card_objects.remove(self)
-        # TODO remove object from warnings_objects list
 
     def display_extra(self, _):
         """toggle secondary panel visibility"""
@@ -176,6 +171,7 @@ class Card:
         return textwrap.TextWrapper(max_lines=3).fill(text=warn.description)
 
     def create_non_warning(self, message, style=None):
+        obj_dict[self] = None
         if style is None:
             style = style_no_warning
         self.frame.configure(height=10, width=60)
@@ -184,10 +180,10 @@ class Card:
 
 
 def rdel():
-    """recursively delete all Warning_info objects"""
-    for obj in card_objects:
-        obj.frame.destroy()
-    card_objects.clear()
+    """recursively delete all Warning_info and Card objects"""
+    for card in obj_dict:
+        card.frame.destroy()
+    obj_dict.clear()
 
 
 def download_json(selected_region):
@@ -232,7 +228,6 @@ def update_time(obj):
         # we are past both the onset and the expiration
         # destroy tkinter warning widgets and remove Warnings object.
 
-        obj.delete()
         return "expired"
 
     elif current_time > onset_time:
