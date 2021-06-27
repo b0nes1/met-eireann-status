@@ -5,6 +5,7 @@ from tkinter import ttk, messagebox
 from datetime import datetime
 import textwrap
 from os import getcwd
+from randomise_demo import randomise_demo_dates
 
 # read json files with weather information
 with open(getcwd() + '\\' + "region_codes.json", "r") as file:
@@ -263,7 +264,7 @@ def flash_red():
 def refresh(_=None):
     """Called when refresh button is pressed. Deletes all card objects and displays new ones"""
     rdel()
-
+    randomise_demo_dates()
     selected_region = combox.get()  # gets the selected region from combo box
     response = download_json(selected_region)
     if response is None:
