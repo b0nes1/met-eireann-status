@@ -354,14 +354,4 @@ def tick():
 tick()
 root.mainloop()
 
-# todo add all information to be displayed
-# todo prevent duplicate warnings
-# todo auto launch at startup and check for warnings in background process
-# todo implement timer to prevent spamming requests
-# todo display time and date on options bar
-# todo edit info.txt to explain warning types
-# todo place icons for warning type
-# todo create a new tab showing a map
-# todo give region by province instead of county
-# todo daily report
-# todo fix blank card showing when warning is expired
+
