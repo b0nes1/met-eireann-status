@@ -250,13 +250,13 @@ def update_time(obj):
 
 def flash_red():
     """Make the headline of warning card flash red and white"""
-    for obj in card_objects:
+    for card, info in obj_dict.items():
         try:
-            if obj.level == "Red":
-                if obj.headline_label["background"] != 'white':
-                    obj.headline_label.configure(backgroun='white')
+            if info.level == "Red":
+                if card.headline_label["background"] != 'white':
+                    card.headline_label.configure(backgroun='white')
                 else:
-                    obj.headline_label.configure(background='red')
+                    card.headline_label.configure(background='red')
         except AttributeError:
             pass
 
@@ -324,7 +324,7 @@ root.resizable(False, False)
 root.title("Met Eireann Status")
 root.iconbitmap("Assets/MetEireann logo-02.ico")
 
-options_frame = tkinter.LabelFrame(root, relief=tkinter.RAISED, borderwidth=5, bg='white')
+options_frame = tkinter.LabelFrame(root, relief=tkinter.RAISED, borderwidth=5)
 options_frame.pack(fill='x')
 
 location_label = tkinter.Label(options_frame, text="Select County:", width=14)
