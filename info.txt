@@ -1,7 +1,13 @@
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum non leo eleifend, pretium dui sed, hendrerit ipsum. Nullam et orci erat. Sed vel urna ultricies, iaculis nisl id, tincidunt sapien. In consectetur lorem id ante posuere, sit amet ullamcorper dui sagittis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed porttitor, risus vel egestas aliquam, diam quam tempor lacus, at scelerisque sapien purus sit amet magna. Proin sit amet nunc nunc.
+Weather Warnings are presented in three categories:
 
-Vestibulum mattis tristique magna, ac scelerisque elit fermentum quis. Maecenas egestas turpis odio, vitae lobortis libero rutrum ac. Nulla ultricies interdum massa, dignissim pharetra risus venenatis eget. Vestibulum malesuada gravida ex in tempor. Nam rhoncus posuere neque, vitae consectetur erat elementum sed. Pellentesque id posuere lorem. Fusce lacinia facilisis blandit. Cras leo mauris, porta ac nulla scelerisque, vestibulum suscipit diam. Curabitur interdum urna id dui ultrices lobortis. Donec auctor arcu purus, eget lacinia massa porttitor in. Suspendisse dictum, magna at consequat euismod, dui dui vehicula metus, eu feugiat risus lacus eu nunc. Curabitur laoreet leo sed placerat sollicitudin. Quisque aliquam nibh leo, sed egestas elit posuere non.
+    STATUS YELLOW - Weather Alert -Be Aware
+The concept behind YELLOW level weather alerts is to notify those who are at risk because of their location and/or activity, and to allow them to take preventative action. It is implicit that YELLOW level weather alerts are for weather conditions that do not pose an immediate threat to the general population, but only to those exposed to risk by nature of their location and/or activity.
 
-Pellentesque a sapien convallis, molestie quam non, dictum est. Quisque magna est, semper sit amet erat non, lacinia blandit sem. Sed vel efficitur quam, eu pellentesque mauris. Suspendisse euismod mauris sed pulvinar rutrum. Duis ut consequat lorem, congue rutrum tellus. Praesent varius eleifend sapien, non pulvinar nunc. In faucibus odio non erat posuere dignissim sed et tortor. Mauris sollicitudin vestibulum massa, nec tincidunt nunc tempus id. Etiam malesuada gravida sapien. Vestibulum ut libero lorem.
+    STATUS ORANGE - Weather Warning -Be Prepared
+This category of ORANGE level weather warnings is for weather conditions which have the capacity to impact significantly on people in the affected areas. The issue of an Orange level weather warning implies that all recipients in the affected areas should prepare themselves in an appropriate way for the anticipated conditions.
+
+    STATUS RED - Severe Weather Warning -Take Action
+The issue of RED level severe weather warnings should be a comparatively rare event and implies that recipients take action to protect themselves and/or their properties; this could be by moving their families out of the danger zone temporarily; by staying indoors; or by other specific actions aimed at mitigating the effects of the weather conditions.
+
 
 Source: Met Eireann via Public Licence, subject to Creative Commons 4.0
