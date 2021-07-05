@@ -5,7 +5,6 @@ import datetime
 
 
 def severity_gen():
-
     return random.choice(["moderate", "severe"])
 
 
@@ -30,7 +29,7 @@ def randomise_demo_dates():
         if i in [0, 2, 3]:  # Normal. Expires in Future, Onset in  Future
             data[i]["onset"] = strformat((now + rand_time_delta()))
             data[i]["expiry"] = strformat(
-                datetime.datetime.strptime(data[i]["onset"], "%Y-%m-%dT%H:%M:%S+00:00") + rand_time_delta()
+                datetime.datetime.strptime(data[i]["onset"], "%Y-%m-%dT%H:%M:%S+00:00") + a
             )
         elif i == 1:  # Expired. Onset in past, Expiry in past
             a = rand_time_delta()
